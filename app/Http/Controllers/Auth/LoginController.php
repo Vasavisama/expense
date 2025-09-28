@@ -24,25 +24,29 @@ class LoginController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
+        // Find user by email
+        $user = \App\Models\User::where('email', $credentials['email'])->first();
 
-        if (! $token = JWTAuth::attempt($credentials)) {
+        // Validate credentials and user existence
+        if (!$user || !\Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
             return redirect()->back()->withErrors(['error' => 'Invalid credentials']);
         }
 
-
-        // Store JWT in cookie: HTTP-only, secure, same-site strict
-        $cookie = Cookie::make('jwt_token', $token, 60, '/', null, true, true, false, 'strict');
-
-
-        // Redirect based on role from JWT payload
-        $payload = JWTAuth::setToken($token)->getPayload();
-        $role = $payload['role'];
-
-
-        if ($role === 'admin') {
-            return redirect('/analytics')->withCookie($cookie);
+        // Check if user is active
+        if (!$user->is_active) {
+            return redirect()->back()->withErrors(['error' => 'Your account is inactive. Please contact an administrator.']);
         }
 
+        // Manually create JWT token
+        $token = JWTAuth::fromUser($user);
+
+        // Store JWT in cookie
+        $cookie = Cookie::make('jwt_token', $token, 60, '/', null, true, true, false, 'strict');
+
+        // Redirect based on role
+        if ($user->role === 'admin') {
+            return redirect('/analytics')->withCookie($cookie);
+        }
 
         return redirect('/user-dashboard')->withCookie($cookie);
     }
