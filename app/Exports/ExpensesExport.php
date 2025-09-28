@@ -2,10 +2,11 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
 
-class ExpensesExport implements FromArray, WithHeadings
+class ExpensesExport implements FromCollection, WithHeadings, WithMapping
 {
     protected $data;
     protected $reportType;
@@ -17,33 +18,40 @@ class ExpensesExport implements FromArray, WithHeadings
     }
 
     /**
+    * @return \Illuminate\Support\Collection
+    */
+    public function collection()
+    {
+        return $this->data;
+    }
+
+    /**
+    * @param mixed $row
     * @return array
     */
-    public function array(): array
+    public function map($row): array
     {
-        return $this->data->map(function ($row) {
-            switch ($this->reportType) {
-                case 'monthly_summary':
-                    return [
-                        $row->year,
-                        $row->month,
-                        $row->total_amount,
-                    ];
-                case 'yearly_summary':
-                    return [
-                        $row->year,
-                        $row->total_amount,
-                    ];
-                case 'full_list':
-                default:
-                    return [
-                        $row->amount,
-                        $row->category,
-                        $row->date,
-                        $row->notes,
-                    ];
-            }
-        })->toArray();
+        switch ($this->reportType) {
+            case 'monthly_summary':
+                return [
+                    $row->year,
+                    $row->month,
+                    $row->total_amount,
+                ];
+            case 'yearly_summary':
+                return [
+                    $row->year,
+                    $row->total_amount,
+                ];
+            case 'full_list':
+            default:
+                return [
+                    $row->amount,
+                    $row->category,
+                    $row->date,
+                    $row->notes,
+                ];
+        }
     }
 
     /**
