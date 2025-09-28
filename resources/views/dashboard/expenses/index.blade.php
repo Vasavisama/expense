@@ -8,7 +8,7 @@
     <!-- Page Heading -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-primary">My Expenses</h2>
-       
+        <a href="{{ route('password.reset') }}" class="btn btn-secondary">Reset Password</a>
     </div>
 
     <!-- Success Message -->
