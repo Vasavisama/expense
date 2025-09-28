@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Reset Password</title>
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@
             border-radius: 20px;
             box-shadow: 0 12px 30px rgba(0,0,0,0.2);
             width: 100%;
-            max-width: 380px;
+            max-width: 420px; /* Adjusted width for better spacing */
             text-align: center;
             animation: fadeIn 1s ease-in-out;
         }
@@ -61,7 +61,7 @@
             box-shadow: 0 0 6px rgba(37,117,252,0.4);
         }
 
-        .btn-login {
+        .btn-reset {
             width: 100%;
             padding: 12px;
             background: linear-gradient(to right, #6a11cb, #2575fc);
@@ -73,7 +73,7 @@
             transition: 0.3s;
         }
 
-        .btn-login:hover {
+        .btn-reset:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(37,117,252,0.4);
         }
@@ -87,6 +87,15 @@
             margin-bottom: 20px;
             text-align: left;
             font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
 
         .login-footer {
@@ -108,7 +117,7 @@
 </head>
 <body>
     <div class="login-card">
-        <h1><i class="fas fa-user-circle"></i> Login</h1>
+        <h1><i class="fas fa-lock"></i> Reset Password</h1>
 
         @if($errors->any())
             <div class="alert-error">
@@ -120,16 +129,22 @@
             </div>
         @endif
 
-        <form method="POST" action="/login">
+        @if(session('success'))
+            <div class="alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <form method="POST" action="/reset-password">
             @csrf
-            <input type="email" name="email" class="form-control" placeholder="Email" required>
-            <input type="password" name="password" class="form-control" placeholder="Password" required>
-            <button type="submit" class="btn-login"><i class="fas fa-sign-in-alt mr-2"></i> Login</button>
+            <input type="password" name="current_password" class="form-control" placeholder="Current Password" required>
+            <input type="password" name="new_password" class="form-control" placeholder="New Password" required>
+            <input type="password" name="new_password_confirmation" class="form-control" placeholder="Confirm New Password" required>
+            <button type="submit" class="btn-reset"><i class="fas fa-key mr-2"></i> Reset Password</button>
         </form>
 
         <div class="login-footer">
-            <p>Don't have an account? <a href="/register">Register here</a></p>
-            <p>Forgot your password? <a href="/reset-password">Reset it here</a></p>
+            <p><a href="/login">Back to Login</a></p>
         </div>
     </div>
 

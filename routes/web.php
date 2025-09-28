@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Dashboard\UserDashboardController;
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Dashboard\ExpenseController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\AnalyticsController;
@@ -32,6 +33,9 @@ Route::middleware('jwt')->group(function () {
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
     Route::post('expenses/export', [ExpenseController::class, 'export'])->name('expenses.export');
     Route::resource('expenses', ExpenseController::class);
+
+    Route::get('/reset-password', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 
     Route::middleware('admin')->group(function () {
         Route::get('/admin-dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
