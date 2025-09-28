@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Cookie;
 
 
 class LoginController extends Controller
+
 {
     public function showLoginForm()
     {
