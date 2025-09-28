@@ -21,7 +21,9 @@ class UserController extends Controller
                   ->orWhere('email', 'like', "%{$search}%");
         }
 
-        $users = $query->orderBy('name')->paginate(10);
+        $users = $query->orderByRaw("role = 'admin' DESC")
+                       ->orderBy('name')
+                       ->paginate(10);
 
         return view('dashboard.users.index', compact('users'));
     }
