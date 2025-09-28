@@ -10,13 +10,6 @@ use App\Http\Controllers\Dashboard\UserDashboardController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Dashboard\ExpenseController;
 
-
-
-
-
-
-
-
 Route::get('/', function () {
     return view('welcome');
 });

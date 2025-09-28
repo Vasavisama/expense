@@ -11,6 +11,7 @@ class ExpenseController extends Controller
 {
     public function index()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $expenses = $user->expenses()->orderBy('date', 'desc')->get();
         return view('dashboard.expenses.index', compact('expenses'));
@@ -30,7 +31,9 @@ class ExpenseController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        Auth::user()->expenses()->create($request->all());
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $user->expenses()->create($request->all());
 
         return redirect()->route('expenses.index')->with('success', 'Expense added successfully.');
     }
