@@ -8,6 +8,8 @@ use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Excel as ExcelTypes;
 
 class ExpenseController extends Controller
 {
@@ -99,11 +101,11 @@ class ExpenseController extends Controller
         }
 
         if ($request->filled('from_date')) {
-            $query->where('date', '>=', $request->from_date);
+            $query->whereDate('date', '>=', $request->from_date);
         }
 
         if ($request->filled('to_date')) {
-            $query->where('date', '<=', $request->to_date);
+            $query->whereDate('date', '<=', $request->to_date);
         }
 
         $reportType = $request->report_type;
@@ -152,7 +154,12 @@ class ExpenseController extends Controller
             return $pdf->download($filename);
         }
 
-        return app('excel')->download(new ExpensesExport($data, $reportType), $filename);
+        $writerType = match($format) {
+            'csv' => ExcelTypes::CSV,
+            'xlsx' => ExcelTypes::XLSX,
+        };
+
+        return Excel::download(new ExpensesExport($data, $reportType), $filename, $writerType);
     }
 }
 
