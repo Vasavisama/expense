@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Dashboard\UserDashboardController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Dashboard\ExpenseController;
+use App\Http\Controllers\Dashboard\AdminController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,11 +27,15 @@ Route::post('/login', [LoginController::class, 'login']);
 
 
 Route::middleware('jwt')->group(function () {
-    Route::get('/admin-dashboard', [AdminDashboardController::class, 'index']);
     Route::get('/user-dashboard', [UserDashboardController::class, 'index']);
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
-    Route::post('expenses/export', [\App\Http\Controllers\Dashboard\ExpenseController::class, 'export'])->name('expenses.export');
     Route::resource('expenses', ExpenseController::class);
 });
 
+Route::middleware(['jwt', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::post('expenses/export', [AdminController::class, 'export'])->name('admin.expenses.export');
+    Route::patch('users/{user}/toggle-status', [AdminController::class, 'toggleStatus'])->name('admin.users.toggle_status');
+    Route::resource('users', AdminController::class);
+});
 
