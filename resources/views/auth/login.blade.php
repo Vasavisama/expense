@@ -4,114 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- FontAwesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js" crossorigin="anonymous"></script>
-
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .login-card {
-            background: #fff;
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-            width: 100%;
-            max-width: 380px;
-            text-align: center;
-            animation: fadeIn 1s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .login-card h1 {
-            font-weight: 600;
-            margin-bottom: 25px;
-            color: #333;
-        }
-
-        .form-control {
-            border-radius: 10px;
-            padding: 12px 15px;
-            font-size: 15px;
-            margin-bottom: 20px;
-            transition: 0.3s;
-        }
-
-        .form-control:focus {
-            border-color: #2575fc;
-            box-shadow: 0 0 6px rgba(37,117,252,0.4);
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(to right, #6a11cb, #2575fc);
-            color: #fff;
-            font-weight: 500;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(37,117,252,0.4);
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: left;
-            font-size: 14px;
-        }
-
-        .login-footer {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .login-footer a {
-            color: #2575fc;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .login-footer a:hover {
-            text-decoration: underline;
-        }
-    </style>
 </head>
-<body>
-    <div class="login-card">
-        <h1><i class="fas fa-user-circle"></i> Login</h1>
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500 via-pink-500 to-red-500">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6"><i class="fas fa-user-circle mr-2"></i> Login</h1>
 
         @if($errors->any())
-            <div class="alert-error">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 <ul class="mb-0">
                     @foreach($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -120,21 +25,67 @@
             </div>
         @endif
 
-        <form method="POST" action="/login">
+        <form id="login-form" method="POST" action="/login" class="space-y-4">
             @csrf
-            <input type="email" name="email" class="form-control" placeholder="Email" required>
-            <input type="password" name="password" class="form-control" placeholder="Password" required>
-            <button type="submit" class="btn-login"><i class="fas fa-sign-in-alt mr-2"></i> Login</button>
+            <div>
+                <input type="email" id="email" name="email" placeholder="Enter your email" value="{{ old('email') }}"
+                       class="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300">
+            </div>
+
+            <div>
+                <input type="password" id="password" name="password" placeholder="Enter your password"
+                       class="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300">
+            </div>
+
+            <button type="submit" id="login-button"
+                    class="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 text-white font-bold py-3 rounded-lg hover:opacity-90 transition">
+                <i class="fas fa-sign-in-alt mr-2"></i> Login
+            </button>
         </form>
 
-        <div class="login-footer">
-            <p>Don't have an account? <a href="/register">Register here</a></p>
-            <p>Forgot your password? <a href="/reset-password">Reset it here</a></p>
+        <div class="text-center text-gray-500 mt-4 space-y-2">
+            <p>Don't have an account? <a href="/register" class="text-pink-600 font-semibold hover:underline">Register here</a></p>
+            <p>Forgot your password? <a href="/reset-password" class="text-pink-600 font-semibold hover:underline">Reset it here</a></p>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function() {
+            $('#login-form').on('submit', function(event) {
+                // Remove old error messages and reset borders
+                $('.error-msg').remove();
+                $('input').removeClass('border-red-500');
+
+                let hasError = false;
+
+                const email = $('#email').val();
+                const password = $('#password').val();
+
+                if (!email) {
+                    $('#email').after('<p class="error-msg text-red-500 text-sm mt-1">Email is required</p>');
+                    $('#email').addClass('border-red-500');
+                    hasError = true;
+                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    $('#email').after('<p class="error-msg text-red-500 text-sm mt-1">Invalid email format</p>');
+                    $('#email').addClass('border-red-500');
+                    hasError = true;
+                }
+
+                if (!password) {
+                    $('#password').after('<p class="error-msg text-red-500 text-sm mt-1">Password is required</p>');
+                    $('#password').addClass('border-red-500');
+                    hasError = true;
+                }
+
+                if (hasError) {
+                    event.preventDefault();
+                    return;
+                }
+
+                // Update button to show loading state
+                $('#login-button').html('<i class="fas fa-spinner fa-spin mr-2"></i> Logging in...').prop('disabled', true);
+            });
+        });
+    </script>
 </body>
 </html>
