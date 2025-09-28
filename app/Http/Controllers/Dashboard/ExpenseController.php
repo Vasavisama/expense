@@ -93,7 +93,12 @@ class ExpenseController extends Controller
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $query = $user->expenses();
+
+        if ($user->is_admin) {
+            $query = Expense::query();
+        } else {
+            $query = $user->expenses();
+        }
 
         if ($request->filled('from_date')) {
             $query->where('date', '>=', $request->from_date);
