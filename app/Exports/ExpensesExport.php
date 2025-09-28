@@ -9,11 +9,13 @@ class ExpensesExport implements FromArray, WithHeadings
 {
     protected $data;
     protected $reportType;
+    protected $isAdminExport;
 
-    public function __construct($data, $reportType)
+    public function __construct($data, $reportType, $isAdminExport = false)
     {
         $this->data = $data;
         $this->reportType = $reportType;
+        $this->isAdminExport = $isAdminExport;
     }
 
     /**
@@ -36,12 +38,18 @@ class ExpensesExport implements FromArray, WithHeadings
                     ];
                 case 'full_list':
                 default:
-                    return [
+                    $rowData = [
                         $row->amount,
                         $row->category,
                         $row->date,
                         $row->notes,
                     ];
+
+                    if ($this->isAdminExport && isset($row->user)) {
+                        array_unshift($rowData, $row->user->name);
+                    }
+
+                    return $rowData;
             }
         })->toArray();
     }
@@ -58,7 +66,13 @@ class ExpensesExport implements FromArray, WithHeadings
                 return ['Year', 'Total Amount'];
             case 'full_list':
             default:
-                return ['Amount', 'Category', 'Date', 'Notes'];
+                $headings = ['Amount', 'Category', 'Date', 'Notes'];
+
+                if ($this->isAdminExport) {
+                    array_unshift($headings, 'User');
+                }
+
+                return $headings;
         }
     }
 }

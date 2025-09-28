@@ -60,6 +60,9 @@
         @else
             <thead>
                 <tr>
+                    @if (isset($is_admin_export) && $is_admin_export)
+                        <th>User</th>
+                    @endif
                     <th>Amount</th>
                     <th>Category</th>
                     <th>Date</th>
@@ -69,6 +72,9 @@
             <tbody>
                 @foreach ($data as $expense)
                     <tr>
+                        @if (isset($is_admin_export) && $is_admin_export)
+                            <td>{{ $expense->user->name }}</td>
+                        @endif
                         <td>{{ $expense->amount }}</td>
                         <td>{{ $expense->category }}</td>
                         <td>{{ $expense->date }}</td>

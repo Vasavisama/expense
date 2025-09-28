@@ -91,8 +91,9 @@ class ExpenseController extends Controller
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        $isAdmin = $user->is_admin;
 
-        if ($user->is_admin) {
+        if ($isAdmin) {
             $query = Expense::query();
         } else {
             $query = $user->expenses();
@@ -140,6 +141,9 @@ class ExpenseController extends Controller
 
             case 'full_list':
             default:
+                if ($isAdmin) {
+                    $query->with('user');
+                }
                 $data = $query->orderBy('date', 'desc')->get();
                 break;
         }
@@ -148,10 +152,14 @@ class ExpenseController extends Controller
         $filename = "expenses-{$reportType}-" . now()->format('Y-m-d') . ".{$format}";
 
         if ($format === 'pdf') {
-            $pdf = app('dompdf.wrapper')->loadView('dashboard.expenses.pdf', ['data' => $data, 'report_type' => $reportType]);
+            $pdf = app('dompdf.wrapper')->loadView('dashboard.expenses.pdf', [
+                'data' => $data,
+                'report_type' => $reportType,
+                'is_admin_export' => $isAdmin
+            ]);
             return $pdf->download($filename);
         }
 
-        return app('excel')->download(new ExpensesExport($data, $reportType), $filename);
+        return app('excel')->download(new ExpensesExport($data, $reportType, $isAdmin), $filename);
     }
 }

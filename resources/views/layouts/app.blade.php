@@ -11,6 +11,11 @@
         <a class="navbar-brand" href="{{ route('expenses.index') }}">Expenses</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ml-auto">
+                @if (Auth::check() && Auth::user()->is_admin)
+                    <li class="nav-item">
+                        <a class="btn btn-info" href="{{ route('admin.dashboard') }}">Admin Panel</a>
+                    </li>
+                @endif
                 <li class="nav-item ml-2">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
