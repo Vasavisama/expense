@@ -93,7 +93,12 @@ class ExpenseController extends Controller
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $query = $user->expenses();
+
+        if ($user->is_admin) {
+            $query = Expense::query();
+        } else {
+            $query = $user->expenses();
+        }
 
         if ($request->filled('from_date')) {
             $query->where('date', '>=', $request->from_date);
@@ -141,9 +146,10 @@ class ExpenseController extends Controller
                 break;
         }
 
-        $filename = "expenses-{$reportType}-" . now()->format('Y-m-d') . ".{$request->format}";
+        $format = $request->input('format');
+        $filename = "expenses-{$reportType}-" . now()->format('Y-m-d') . ".{$format}";
 
-        if ($request->format === 'pdf') {
+        if ($format === 'pdf') {
             $pdf = PDF::loadView('dashboard.expenses.pdf', ['data' => $data, 'report_type' => $reportType]);
             return $pdf->download($filename);
         }

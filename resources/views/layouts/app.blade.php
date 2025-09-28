@@ -11,9 +11,6 @@
         <a class="navbar-brand" href="{{ route('expenses.index') }}">Expenses</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="btn btn-primary" href="{{ route('expenses.create') }}">Add Expense</a>
-                </li>
                 <li class="nav-item ml-2">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

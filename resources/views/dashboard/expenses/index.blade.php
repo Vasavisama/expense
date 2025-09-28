@@ -5,9 +5,12 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>My Expenses</h1>
-        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exportModal">
-            Export
-        </button>
+        <div>
+            <a href="{{ route('expenses.create') }}" class="btn btn-primary">Add Expense</a>
+            <button type="button" class="btn btn-secondary ml-2" data-toggle="modal" data-target="#exportModal">
+                Export
+            </button>
+        </div>
     </div>
 
     <!-- Export Modal -->
