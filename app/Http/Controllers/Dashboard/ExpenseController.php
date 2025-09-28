@@ -5,11 +5,9 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Exports\ExpensesExport;
 use App\Models\Expense;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ExpenseController extends Controller
 {
@@ -150,10 +148,10 @@ class ExpenseController extends Controller
         $filename = "expenses-{$reportType}-" . now()->format('Y-m-d') . ".{$format}";
 
         if ($format === 'pdf') {
-            $pdf = PDF::loadView('dashboard.expenses.pdf', ['data' => $data, 'report_type' => $reportType]);
+            $pdf = app('dompdf.wrapper')->loadView('dashboard.expenses.pdf', ['data' => $data, 'report_type' => $reportType]);
             return $pdf->download($filename);
         }
 
-        return Excel::download(new ExpensesExport($data, $reportType), $filename);
+        return app('excel')->download(new ExpensesExport($data, $reportType), $filename);
     }
 }
