@@ -31,10 +31,13 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 
 
+use App\Http\Controllers\ExpenseController;
+
 Route::middleware('jwt')->group(function () {
     Route::get('/admin-dashboard', [AdminDashboardController::class, 'index']);
     Route::get('/user-dashboard', [UserDashboardController::class, 'index']);
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
+    Route::resource('expenses', ExpenseController::class);
 });
 
 

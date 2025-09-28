@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Dashboard</title>
-</head>
-<body>
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
     <h1>Welcome to User Dashboard</h1>
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit">Logout</button>
-    </form>
-</body>
-</html>
+    <p>You can manage your expenses from here.</p>
+    <a href="{{ route('expenses.index') }}" class="btn btn-primary">Manage Expenses</a>
+</div>
+@endsection

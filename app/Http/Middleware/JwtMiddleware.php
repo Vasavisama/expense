@@ -11,16 +11,10 @@ class JwtMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        $token = $request->cookie('jwt_token');
-
-        if (! $token) {
-            return redirect('/login')->withErrors(['error' => 'Unauthorized']);
-        }
-
         try {
-            $user = JWTAuth::setToken($token)->authenticate();
+            $user = JWTAuth::parseToken()->authenticate();
         } catch (JWTException $e) {
-            return redirect('/login')->withErrors(['error' => 'Token invalid']);
+            return redirect('/login')->withErrors(['error' => 'Unauthorized']);
         }
 
         return $next($request);
