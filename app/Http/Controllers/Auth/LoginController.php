@@ -40,7 +40,7 @@ class LoginController extends Controller
 
 
         if ($role === 'admin') {
-            return redirect('/admin-dashboard')->withCookie($cookie);
+            return redirect('/analytics')->withCookie($cookie);
         }
 
 
