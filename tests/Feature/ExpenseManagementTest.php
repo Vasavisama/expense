@@ -147,4 +147,90 @@ class ExpenseManagementTest extends TestCase
         $response = $this->post('/expenses', ['category' => 'Invalid Category']);
         $response->assertSessionHasErrors('category');
     }
+
+    public function test_user_can_export_expenses_as_csv()
+    {
+        $user = $this->createAndLoginUser();
+        Expense::factory()->create(['user_id' => $user->id, 'amount' => 100, 'category' => 'Food', 'date' => '2025-01-01', 'notes' => 'Lunch']);
+        Expense::factory()->create(['user_id' => $user->id, 'amount' => 200, 'category' => 'Travel', 'date' => '2025-01-02', 'notes' => 'Train ticket']);
+
+        $response = $this->post('/expenses/export', [
+            'report_type' => 'full_list',
+            'format' => 'csv',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->assertHeader('Content-Disposition', 'attachment; filename=expenses-full_list-'.now()->format('Y-m-d').'.csv');
+
+        $content = $response->getContent();
+        $this->assertStringContainsString('Amount,Category,Date,Notes', $content);
+        $this->assertStringContainsString('100,Food,2025-01-01,Lunch', $content);
+        $this->assertStringContainsString('200,Travel,2025-01-02,Train ticket', $content);
+    }
+
+    public function test_user_can_export_expenses_as_pdf()
+    {
+        $user = $this->createAndLoginUser();
+        Expense::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->post('/expenses/export', [
+            'report_type' => 'full_list',
+            'format' => 'pdf',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
+        $response->assertHeader('Content-Disposition', 'attachment; filename=expenses-full_list-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    public function test_user_can_export_expenses_as_xlsx()
+    {
+        $user = $this->createAndLoginUser();
+        Expense::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->post('/expenses/export', [
+            'report_type' => 'full_list',
+            'format' => 'xlsx',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->assertHeader('Content-Disposition', 'attachment; filename=expenses-full_list-'.now()->format('Y-m-d').'.xlsx');
+    }
+
+    public function test_user_can_export_filtered_expenses()
+    {
+        $user = $this->createAndLoginUser();
+        $expenseToExclude1 = Expense::factory()->create(['user_id' => $user->id, 'amount' => 100, 'date' => '2025-01-01']);
+        $expenseToInclude = Expense::factory()->create(['user_id' => $user->id, 'amount' => 200, 'date' => '2025-02-15']);
+        $expenseToExclude2 = Expense::factory()->create(['user_id' => $user->id, 'amount' => 300, 'date' => '2025-03-01']);
+
+        $response = $this->post('/expenses/export', [
+            'report_type' => 'full_list',
+            'format' => 'csv',
+            'from_date' => '2025-02-01',
+            'to_date' => '2025-02-28',
+        ]);
+
+        $response->assertStatus(200);
+        $content = $response->getContent();
+        $this->assertStringContainsString((string) $expenseToInclude->amount, $content);
+        $this->assertStringNotContainsString((string) $expenseToExclude1->amount, $content);
+        $this->assertStringNotContainsString((string) $expenseToExclude2->amount, $content);
+    }
+
+    public function test_export_validation()
+    {
+        $this->createAndLoginUser();
+
+        $response = $this->post('/expenses/export', []);
+        $response->assertSessionHasErrors(['report_type', 'format']);
+
+        $response = $this->post('/expenses/export', ['report_type' => 'invalid', 'format' => 'invalid']);
+        $response->assertSessionHasErrors(['report_type', 'format']);
+
+        $response = $this->post('/expenses/export', ['from_date' => 'not-a-date']);
+        $response->assertSessionHasErrors('from_date');
+    }
 }

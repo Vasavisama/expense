@@ -29,6 +29,7 @@ Route::middleware('jwt')->group(function () {
     Route::get('/admin-dashboard', [AdminDashboardController::class, 'index']);
     Route::get('/user-dashboard', [UserDashboardController::class, 'index']);
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
+    Route::post('expenses/export', [\App\Http\Controllers\Dashboard\ExpenseController::class, 'export'])->name('expenses.export');
     Route::resource('expenses', ExpenseController::class);
 });
 
