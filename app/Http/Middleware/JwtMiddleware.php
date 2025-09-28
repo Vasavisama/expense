@@ -18,7 +18,7 @@ class JwtMiddleware
         }
 
         try {
-            $user = JWTAuth::setToken($token)->authenticate();
+            JWTAuth::setToken($token)->authenticate();
         } catch (JWTException $e) {
             return redirect('/login')->withErrors(['error' => 'Token invalid']);
         }
