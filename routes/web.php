@@ -33,6 +33,8 @@ Route::middleware('jwt')->group(function () {
     Route::get('/user-dashboard', [UserDashboardController::class, 'index']);
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
     Route::post('expenses/export', [ExpenseController::class, 'export'])->name('expenses.export');
+    Route::get('expenses/import', [ExpenseController::class, 'showImportForm'])->name('expenses.import.form');
+    Route::post('expenses/import', [ExpenseController::class, 'import'])->name('expenses.import');
     Route::resource('expenses', ExpenseController::class);
 
     Route::get('/reset-password', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
