@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendWelcomeEmail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -48,6 +49,9 @@ class RegisterController extends Controller
             'password' => Hash::make($request->password),
             'role'     => $role,
         ]);
+
+        // Dispatch job to send welcome email
+        SendWelcomeEmail::dispatch($user);
 
         return redirect('/login')->with('success', 'Registration successful! Please log in.');
     }
