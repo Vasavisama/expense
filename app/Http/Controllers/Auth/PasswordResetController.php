@@ -22,7 +22,7 @@ class PasswordResetController extends Controller
             'new_password' => 'required|string|min:8|confirmed',
         ]);
 
-        $user = Auth::user();
+        $user = User::find(Auth::id());
 
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Current password is not correct']);

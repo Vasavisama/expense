@@ -58,7 +58,7 @@ class AnalyticsController extends Controller
 
         $expenses = $query->get();
 
-        if ($request->format === 'csv') {
+        if ($request->get('format') === 'csv') {
             $fileName = 'expenses.csv';
             $headers = array(
                 "Content-type"        => "text/csv",
@@ -90,11 +90,11 @@ class AnalyticsController extends Controller
             return Response::stream($callback, 200, $headers);
         }
 
-        if ($request->format === 'excel') {
+        if ($request->get('format') === 'excel') {
             return Excel::download(new ExpensesExport($expenses), 'expenses.xlsx');
         }
 
-        if ($request->format === 'pdf') {
+        if ($request->get('format') === 'pdf') {
             $pdf = Pdf::loadView('pdf.expenses', compact('expenses'));
             return $pdf->download('expenses.pdf');
         }
