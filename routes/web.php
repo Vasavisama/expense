@@ -41,5 +41,6 @@ Route::middleware('jwt')->group(function () {
         Route::get('/admin-dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
         Route::resource('users', UserController::class);
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+        Route::post('analytics/export', [AnalyticsController::class, 'export'])->name('analytics.export');
     });
 });

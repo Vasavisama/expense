@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Exports\AnalyticsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AnalyticsController extends Controller
 {
@@ -19,5 +22,58 @@ class AnalyticsController extends Controller
             ->get();
 
         return view('dashboard.analytics.index', compact('topSpenders'));
+    }
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'report_type' => 'required|string|in:full_list,monthly_summary,yearly_summary',
+            'from_date' => 'nullable|date',
+            'to_date' => 'nullable|date|after_or_equal:from_date',
+            'format' => 'required|string|in:csv,excel,pdf',
+        ]);
+
+        $reportType = $request->input('report_type');
+        $format = $request->input('format');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        $data = $this->getReportData($reportType, $fromDate, $toDate);
+
+        $filename = 'analytics_report_' . date('Y-m-d') . '.' . ($format == 'excel' ? 'xlsx' : $format);
+
+        if ($format === 'csv' || $format === 'excel') {
+            return Excel::download(new AnalyticsExport($data), $filename);
+        }
+
+        if ($format === 'pdf') {
+            $pdf = Pdf::loadView('dashboard.analytics.pdf', ['data' => $data, 'reportType' => $reportType]);
+            return $pdf->download($filename);
+        }
+
+        return redirect()->back()->with('error', 'Invalid export format.');
+    }
+
+    private function getReportData($reportType, $fromDate, $toDate)
+    {
+        $query = User::query()
+            ->join('expenses', 'users.id', '=', 'expenses.user_id');
+
+        if ($reportType === 'full_list') {
+            $query->select('users.name', 'users.email', 'expenses.description', 'expenses.amount', 'expenses.date')
+                ->when($fromDate, fn($q) => $q->where('expenses.date', '>=', $fromDate))
+                ->when($toDate, fn($q) => $q->where('expenses.date', '<=', $toDate))
+                ->orderBy('expenses.date', 'desc');
+        } elseif ($reportType === 'monthly_summary') {
+            $query->select(DB::raw('YEAR(expenses.date) as year, MONTH(expenses.date) as month, SUM(expenses.amount) as total_amount'))
+                ->groupBy('year', 'month')
+                ->orderBy('year', 'desc')->orderBy('month', 'desc');
+        } elseif ($reportType === 'yearly_summary') {
+            $query->select(DB::raw('YEAR(expenses.date) as year, SUM(expenses.amount) as total_amount'))
+                ->groupBy('year')
+                ->orderBy('year', 'desc');
+        }
+
+        return $query->get();
     }
 }
