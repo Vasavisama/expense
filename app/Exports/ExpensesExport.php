@@ -2,19 +2,18 @@
 
 namespace App\Exports;
 
+use App\Models\Expense;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
 class ExpensesExport implements FromCollection, WithHeadings, WithMapping
 {
-    protected $data;
-    protected $reportType;
+    protected $expenses;
 
-    public function __construct($data, $reportType)
+    public function __construct($expenses)
     {
-        $this->data = $data;
-        $this->reportType = $reportType;
+        $this->expenses = $expenses;
     }
 
     /**
@@ -22,36 +21,7 @@ class ExpensesExport implements FromCollection, WithHeadings, WithMapping
     */
     public function collection()
     {
-        return $this->data;
-    }
-
-    /**
-    * @param mixed $row
-    * @return array
-    */
-    public function map($row): array
-    {
-        switch ($this->reportType) {
-            case 'monthly_summary':
-                return [
-                    $row->year,
-                    $row->month,
-                    $row->total_amount,
-                ];
-            case 'yearly_summary':
-                return [
-                    $row->year,
-                    $row->total_amount,
-                ];
-            case 'full_list':
-            default:
-                return [
-                    $row->amount,
-                    $row->category,
-                    $row->date,
-                    $row->notes,
-                ];
-        }
+        return $this->expenses;
     }
 
     /**
@@ -59,14 +29,27 @@ class ExpensesExport implements FromCollection, WithHeadings, WithMapping
      */
     public function headings(): array
     {
-        switch ($this->reportType) {
-            case 'monthly_summary':
-                return ['Year', 'Month', 'Total Amount'];
-            case 'yearly_summary':
-                return ['Year', 'Total Amount'];
-            case 'full_list':
-            default:
-                return ['Amount', 'Category', 'Date', 'Notes'];
-        }
+        return [
+            'User',
+            'Email',
+            'Category',
+            'Amount',
+            'Date',
+        ];
+    }
+
+    /**
+     * @param Expense $expense
+     * @return array
+     */
+    public function map($expense): array
+    {
+        return [
+            $expense->user->name,
+            $expense->user->email,
+            $expense->category,
+            $expense->amount,
+            $expense->date,
+        ];
     }
 }
