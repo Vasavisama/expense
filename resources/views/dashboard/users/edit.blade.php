@@ -38,7 +38,6 @@
                     <label for="role">Role</label>
                     <select name="role" id="role" class="form-control @error('role') is-invalid @enderror" required>
                         <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>User</option>
-                        <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin</option>
                     </select>
                     @error('role')
                         <span class="invalid-feedback" role="alert">
