@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Http\Controllers\Auth;
-
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -10,48 +8,55 @@ use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Cookie;
 
-
 class LoginController extends Controller
-
 {
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
 
-
+        // Check credentials with JWT attempt
         if (! $token = JWTAuth::attempt($credentials)) {
             return redirect()->back()->withErrors(['error' => 'Invalid credentials']);
         }
+
         $user = Auth::user();
-        if (!$user->is_active) {
-            // Do not proceed with JWT/token creation
-            return redirect()->route('login')->with('error', 'Your account is not active yet. An administrator must activate it before you can log in.');
+
+        // ✅ Check if user is not activated by admin
+        if (! $user->is_active) {
+            Auth::logout(); // make sure no session stays
+            return redirect()->back()
+                ->with('error', 'Admin has not activated your account yet. Please wait until activation.');
         }
 
-// proceed to create JWT and cookie
+        // ✅ If active → proceed with JWT creation
         $token = JWTAuth::fromUser($user);
 
-        // Store JWT in cookie: HTTP-only, secure, same-site strict
-        $cookie = Cookie::make('jwt_token', $token, 60, '/', null, true, true, false, 'strict');
+        // Store JWT in HTTP-only secure cookie
+        $cookie = Cookie::make(
+            'jwt_token',
+            $token,
+            60, // minutes
+            '/',
+            null,
+            true,  // Secure
+            true,  // HttpOnly
+            false,
+            'strict'
+        );
 
-
-        // Redirect based on role from JWT payload
+        // Extract role from JWT payload
         $payload = JWTAuth::setToken($token)->getPayload();
-
-
         $role = $payload['role'];
 
-
+        // Redirect based on role
         if ($role === 'admin') {
             return redirect('/analytics')->withCookie($cookie);
         }
-
 
         return redirect('/user-dashboard')->withCookie($cookie);
     }
