@@ -30,8 +30,9 @@ class RegisterController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Check if role is admin
+        // Check role
         $role = $request->input('role', 'user'); // default = user
+
         if ($role === 'admin') {
             // Ensure only one admin exists
             $adminExists = User::where('role', 'admin')->exists();
@@ -40,19 +41,33 @@ class RegisterController extends Controller
                     ->withErrors(['role' => 'An admin already exists. Only one admin is allowed.'])
                     ->withInput();
             }
+
+            // Admins should be active immediately
+            $user = User::create([
+                'name'        => $request->name,
+                'email'       => $request->email,
+                'password'    => Hash::make($request->password),
+                'role'        => 'admin',
+                'is_active'   => true,
+                'activated_at'=> now(),
+            ]);
+
+            SendWelcomeEmail::dispatch($user);
+
+            return redirect('/login')->with('success', 'Admin account created and activated. You can log in immediately.');
         }
 
-        // Create user
+        // Normal user: inactive by default
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => $role,
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
+            'role'      => 'user',
+            'is_active' => false,
         ]);
 
-        // Dispatch job to send welcome email
         SendWelcomeEmail::dispatch($user);
 
-        return redirect('/login')->with('success', 'Registration successful! A confirmation email is on its way.');
+        return redirect('/login')->with('success', 'Registration successful. Your account will be activated by an administrator.');
     }
 }

@@ -28,7 +28,14 @@ class LoginController extends Controller
         if (! $token = JWTAuth::attempt($credentials)) {
             return redirect()->back()->withErrors(['error' => 'Invalid credentials']);
         }
+        $user = Auth::user();
+        if (!$user->is_active) {
+            // Do not proceed with JWT/token creation
+            return redirect()->route('login')->with('error', 'Your account is not active yet. An administrator must activate it before you can log in.');
+        }
 
+// proceed to create JWT and cookie
+        $token = JWTAuth::fromUser($user);
 
         // Store JWT in cookie: HTTP-only, secure, same-site strict
         $cookie = Cookie::make('jwt_token', $token, 60, '/', null, true, true, false, 'strict');
@@ -36,6 +43,8 @@ class LoginController extends Controller
 
         // Redirect based on role from JWT payload
         $payload = JWTAuth::setToken($token)->getPayload();
+
+
         $role = $payload['role'];
 
 

@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendWelcomeEmail;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -97,4 +100,26 @@ class UserController extends Controller
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
+
+    public function activate(Request $request, User $user)
+{
+    if ($user->is_active) {
+        return back()->with('info', 'User already active.');
+    }
+
+    $user->is_active = true;
+    $user->activated_at = now();
+    $user->save();
+
+    // send activation mail (synchronous) so admin sees immediate result
+    try {
+        SendWelcomeEmail::dispatch($user);
+    } catch (\Throwable $e) {
+        Log::error("Activation email failed for user {$user->id}: ".$e->getMessage());
+        return back()->with('success', 'User activated but activation email failed to send.');
+    }
+
+    return back()->with('success', 'User activated and activation email sent to ' . $user->email);
+}
+
 }
