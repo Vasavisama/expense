@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Exports\ExpensesExport;
+use App\Imports\ExpensesImport;
 use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Excel as ExcelTypes;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class ExpenseController extends Controller
 {
@@ -19,6 +21,11 @@ class ExpenseController extends Controller
         $user = Auth::user();
         $expenses = $user->expenses()->orderBy('date', 'desc')->get();
         return view('dashboard.expenses.index', compact('expenses'));
+    }
+
+    public function showImportForm()
+    {
+        return view('dashboard.expenses.import');
     }
 
     public function create()
@@ -160,6 +167,27 @@ class ExpenseController extends Controller
         };
 
         return Excel::download(new ExpensesExport($data, $reportType), $filename, $writerType);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt',
+        ]);
+
+        try {
+            Excel::import(new ExpensesImport, $request->file('file'));
+            return redirect()->route('expenses.index')->with('success', 'Expenses imported successfully.');
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+            $errorMessages = [];
+            foreach ($failures as $failure) {
+                $errorMessages[] = "Row {$failure->row()}: " . implode(', ', $failure->errors());
+            }
+            return redirect()->route('expenses.import.form')->withErrors($errorMessages);
+        } catch (\Exception $e) {
+            return redirect()->route('expenses.import.form')->withErrors(['file' => 'An unexpected error occurred during the import: ' . $e->getMessage()]);
+        }
     }
 }
 
