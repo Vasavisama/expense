@@ -44,7 +44,7 @@
                     </thead>
                     <tbody>
                         @forelse ($users as $user)
-                            <tr>
+                            <tr id="user-row-{{ $user->id }}">
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>{{ ucfirst($user->role) }}</td>
@@ -61,7 +61,7 @@
                                         <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                                         </form>
                                     </td>
                                 @else
@@ -82,4 +82,57 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    function getCsrfToken() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta) return meta.getAttribute('content');
+        var input = document.querySelector('input[name="_token"]');
+        return input ? input.value : '';
+    }
+    var csrf = getCsrfToken();
+
+    document.querySelectorAll('form').forEach(function(form) {
+        var methodInput = form.querySelector('input[name="_method"][value="DELETE"]');
+        if (!methodInput) return;
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!confirm('Are you sure you want to delete this user?')) return;
+
+            var action = form.getAttribute('action');
+            var row = form.closest('tr');
+
+            fetch(action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrf,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({_method: 'DELETE', _token: csrf})
+            })
+            .then(res => res.json())
+            .then(json => {
+                if (json.success) {
+                    if (row) row.remove();
+                    var container = document.querySelector('.container');
+                    var alert = document.createElement('div');
+                    alert.className = 'alert alert-success';
+                    alert.textContent = json.message || 'User deleted successfully.';
+                    container.insertBefore(alert, container.firstChild);
+                    setTimeout(() => alert.remove(), 2500);
+                } else if (json.error) {
+                    alert(json.error);
+                }
+            })
+            .catch(err => console.error(err));
+        });
+    });
+});
+</script>
+@endpush
 @endsection
