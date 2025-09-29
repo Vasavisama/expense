@@ -53,6 +53,6 @@ class RegisterController extends Controller
         // Dispatch job to send welcome email
         SendWelcomeEmail::dispatch($user);
 
-        return redirect('/login')->with('success', 'Registration successful! A confirmation email is on its way.');
+        return redirect('/login')->with('success', 'Registration successful! Please log in.');
     }
 }
