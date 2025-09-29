@@ -75,6 +75,16 @@
                         <input type="date" class="form-control" id="to_date" name="to_date">
                     </div>
                     <div class="form-group">
+                        <label for="category">Category</label>
+                        <select class="form-control" id="category" name="category">
+                            <option value="">All</option>
+                            <option value="Food">Food</option>
+                            <option value="Rent">Rent</option>
+                            <option value="Travel">Travel</option>
+                            <option value="Shopping">Shopping</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="format">Format</label>
                         <select class="form-control" id="format" name="format">
                             <option value="csv">CSV</option>
