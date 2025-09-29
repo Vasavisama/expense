@@ -52,7 +52,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" style="text-align: center;">No data available.</td>
+                    <td colspan="6" style="text-align: center;">No data available.</td>
                 </tr>
             @endforelse
         </tbody>
